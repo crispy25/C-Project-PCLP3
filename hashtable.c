@@ -39,9 +39,9 @@ hashtable_t *ht_create(unsigned int hmax, unsigned int (*hash_function)(void*),
 		int (*compare_function)(void*, void*),
 		void (*key_val_free_function)(void*))
 {
-	hashtable_t *ht = malloc(sizeof(*ht));
+	hashtable_t *ht = ALLOC(hashtable_t, 1);
 	DIE(!ht, "Error allocating memory\n");
-	ht->buckets = malloc(hmax * sizeof(*ht->buckets));
+	ht->buckets = ALLOC(linked_list_t *, hmax);
 	DIE(!ht->buckets, "Error allocating memory\n");
 	for (unsigned int i = 0; i < hmax; i++) {
 		ht->buckets[i] = ll_create(sizeof(info));
@@ -105,6 +105,7 @@ void ht_put(hashtable_t *ht, void *key, unsigned int key_size,
 	DIE(!i.value, "Error alocating memory\n");
 	memcpy(i.key, key, key_size);
 	memcpy(i.value, value, value_size);
+
 	ll_add_nth_node(ht->buckets[index], ht->buckets[index]->size, &i);
 }
 
@@ -124,9 +125,9 @@ void ht_remove_entry(hashtable_t *ht, void *key)
 		pos++;
 	}
 	node = ll_remove_nth_node(ht->buckets[index], pos);
-	key_val_free_function(node->data);
-	free(node->data);
-	free(node);
+	ht->key_val_free_function(node->data);
+	SAFE_FREE(node->data);
+	SAFE_FREE(node);
 	ht->size--;
 }
 
@@ -139,13 +140,13 @@ void ht_free(hashtable_t *ht)
 		while (node) {
 			prev = node;
 			node = node->next;
-			key_val_free_function(prev->data);
+			ht->key_val_free_function(prev->data);
 		}
 		ll_free(&ht->buckets[i]);
 	}
 	if (ht->buckets)
-		free(ht->buckets);
-	free(ht);
+		SAFE_FREE(ht->buckets);
+	SAFE_FREE(ht);
 	ht = NULL;
 }
 
@@ -157,23 +158,4 @@ unsigned int ht_get_size(hashtable_t *ht)
 unsigned int ht_get_hmax(hashtable_t *ht)
 {
 	return ht == NULL ? 0 : ht->hmax;
-}
-
-void print_data(void *data, FILE *f)
-{
-	info *p = (info *)data;
-	fprintf(f, "%s %s\n", (char *)p->key, (char *)p->value);
-}
-
-void ht_print(hashtable_t *ht, FILE *f)
-{
-	if (!ht)
-		return;
-	for (unsigned int i = 0; i < ht->hmax; i++) {
-		ll_node_t *node = ht->buckets[i]->head;
-		while (node) {
-			print_data(node->data, f);
-			node = node->next;
-		}
-	}
 }
