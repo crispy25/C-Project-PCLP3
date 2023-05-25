@@ -15,4 +15,14 @@
         }                                                                      \
     } while (0)
 
+
+#define ALLOC(type,n) (type *) malloc((n) * sizeof(type))
+
+#define SAFE_FREE(ptr)	\
+do { 					\
+	if (ptr)			\
+		free(ptr);		\
+} while (0)
+
+
 #endif /* _UTILS_H_ */

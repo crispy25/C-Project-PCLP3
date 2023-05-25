@@ -8,7 +8,7 @@ linked_list_t *ll_create(unsigned int data_size)
 {
 	linked_list_t* ll;
 
-	ll = malloc(sizeof(*ll));
+	ll = ALLOC(linked_list_t, 1);
 
 	ll->head = NULL;
 	ll->data_size = data_size;
@@ -36,7 +36,7 @@ void ll_add_nth_node(linked_list_t* list, unsigned int n, const void* new_data)
 		--n;
 	}
 
-	new_node = malloc(sizeof(*new_node));
+	new_node = ALLOC(ll_node_t, 1);
 	new_node->data = malloc(list->data_size);
 	memcpy(new_node->data, new_data, list->data_size);
 
@@ -85,23 +85,23 @@ unsigned int ll_get_size(linked_list_t* list)
 	return list->size;
 }
 
-void ll_free(linked_list_t** pp_list)
+void ll_free(linked_list_t** list)
 {
 	ll_node_t* currNode;
 
-	if (!pp_list || !*pp_list)
+	if (!list || !*list)
 		return;
 
-	while (ll_get_size(*pp_list) > 0) {
-		currNode = ll_remove_nth_node(*pp_list, 0);
-		free(currNode->data);
+	while (ll_get_size(*list) > 0) {
+		currNode = ll_remove_nth_node(*list, 0);
+		SAFE_FREE(currNode->data);
 		currNode->data = NULL;
-		free(currNode);
+		SAFE_FREE(currNode);
 		currNode = NULL;
 	}
 
-	free(*pp_list);
-	*pp_list = NULL;
+	SAFE_FREE(*list);
+	*list = NULL;
 }
 
 void ll_print_string(linked_list_t* list)
