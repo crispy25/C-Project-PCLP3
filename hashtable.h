@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include "list.h"
 
-#define MAX_STRING_SIZE	256
 #define HMAX 100
 
 typedef struct info {
@@ -50,9 +49,5 @@ void ht_free(hashtable_t *ht);
 unsigned int ht_get_size(hashtable_t *ht);
 
 unsigned int ht_get_hmax(hashtable_t *ht);
-
-void print_data(void *data, FILE *f);
-
-void ht_print(hashtable_t *ht, FILE *f);
 
 #endif /* _HASHTABLE_H_ */
